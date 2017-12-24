@@ -24,13 +24,13 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
     private static final int LEVEL_1 = 1;
     private static final int MINE_1 = 15;
     private static final int MAP_SIZE_1 = 10;
-    //LEVEL2 mines/boxes = 40/225
+    //LEVEL2 mines/boxes = 30/225 = 13.3%
     private static final int LEVEL_2 = 2;
-    private static final int MINE_2 = 40;
+    private static final int MINE_2 = 30;
     private static final int MAP_SIZE_2 = 15;
-    //LEVEL3 mines/boxes = 60/225
+    //LEVEL3 mines/boxes = 45/225 = 20%
     private static final int LEVEL_3 = 3;
-    private static final int MINE_3= 60;
+    private static final int MINE_3= 45;
     private static final int MAP_SIZE_3 = 15;
 
     private int mMines = 10;
@@ -41,6 +41,12 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
     private Box[][] mMatrix;
     private int mMarginTop;
     private int sceenWidth;
+    //grid edge arguments
+    private int startLeft;
+    private int startTop;
+    private int stopRight;
+    private int stopBottom;
+
     private AlertDialog.Builder gameOverDialogBuider = new AlertDialog.Builder(getContext());
 
 
@@ -63,6 +69,7 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
                 System.exit(0);
             }
         });
+        gameOverDialogBuider.setCancelable(false);
 
         Log.d(TAG, "create Playground");
 
@@ -71,6 +78,7 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
     }
 
     private void initGame() {
+
         //difficulty = getDifficulty();
         if (getDifficulty()==LEVEL_1) {             //mines/boxes = 15/100
             mapSize = MAP_SIZE_1;
@@ -94,6 +102,11 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
                 mMatrix[i][j] = new Box(i, j);
             }
         }
+        //init grid edge arguments
+        startLeft = boxWidth / 2;
+        startTop = boxWidth / 2 + mMarginTop;
+        stopRight = startLeft + boxWidth * mapSize;
+        stopBottom = startTop + boxWidth * mapSize;
         //create mines
         for (int i = 0; i < mMines; ) {
             int x = (int) ((Math.random() * 1000) % mapSize);
@@ -145,12 +158,6 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
         Canvas canvas = getHolder().lockCanvas();
         canvas.drawColor(Color.WHITE);
         Paint backgroundPaint = new Paint();
-
-        //grid edge arguments
-        int startLeft = boxWidth / 2;
-        int startTop = boxWidth / 2 + mMarginTop;
-        int stopRight = startLeft + boxWidth * mapSize;
-        int stopBottom = startTop + boxWidth * mapSize;
 
         int borderWidth = boxWidth / 2;
         //draw game panel
@@ -281,6 +288,7 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
         AlertDialog startGameAlertDialog = startGameDialogBuilder.create();
         startGameAlertDialog.setTitle("选择难度");
         startGameAlertDialog.setMessage("请选择游戏难度：\n若您的屏幕小于4.5寸，请选择简单");
+        startGameAlertDialog.setCancelable(false);
         startGameAlertDialog.show();
     }
 
@@ -302,19 +310,14 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
             int x, y;
-            if (event.getX() < boxWidth / 2 || event.getX() > mapSize * boxWidth + boxWidth / 2 || event.getY() < mMarginTop + boxWidth / 2) {
-                //left-top-right frame
-                //most touch above game map
+            if (event.getX() < startLeft || event.getX() > stopRight || event.getY() < startTop||event.getY() > stopBottom) {
+                //touch out of game panel
             } else {
+                //touch in game map
                 x = (int) ((event.getX() - boxWidth / 2) / boxWidth);
                 y = (int) ((event.getY() - boxWidth / 2 - mMarginTop) / boxWidth);
-                if (x <= mapSize && y <= mapSize) {
-                    //touch in game map
-                    if (getBox(x, y).getStatus() == Box.STATUS_UNKNOWN) {
-                        changeStatus(getBox(x, y));
-                    }
-                } else {
-                    //touch blow game map
+                if (getBox(x, y).getStatus() == Box.STATUS_UNKNOWN) {
+                    changeStatus(getBox(x, y));
                 }
             }
         }
