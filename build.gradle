@@ -1,0 +1,5 @@
+// Top-level build file. No plugins are applied at the root; module-level scripts
+// declare what they need. AGP must be downloaded by Gradle on first sync.
+plugins {
+    id 'com.android.application' version '8.7.3' apply false
+}

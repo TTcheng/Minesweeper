@@ -1,5 +1,6 @@
 package com.example.wangchuncheng.minesweeper;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,7 +67,12 @@ public class Playground extends SurfaceView implements View.OnTouchListener {
         gameOverDialogBuider.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                System.exit(0);
+                // System.exit() kills the process abruptly and can break Android
+                // lifecycle on modern versions; finishing the activity lets the
+                // framework dispose of the surface cleanly.
+                if (getContext() instanceof Activity) {
+                    ((Activity) getContext()).finish();
+                }
             }
         });
         gameOverDialogBuider.setCancelable(false);
